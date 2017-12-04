@@ -1,0 +1,22 @@
+{
+  "name": "ws-react-native-utils",
+  "version": "1.0.0",
+  "description": "mojiSrc react-native utils",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mojisrc/ws-react-native-utils.git"
+  },
+  "keywords": [
+    "wenshuaikeji"
+  ],
+  "author": "李杰",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mojisrc/ws-react-native-utils/issues"
+  },
+  "homepage": "https://github.com/mojisrc/ws-react-native-utils#readme"
+}
