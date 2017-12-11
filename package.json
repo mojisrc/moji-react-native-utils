@@ -1,6 +1,6 @@
 {
   "name": "ws-react-native-utils",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "mojiSrc react-native utils",
   "main": "index.js",
   "scripts": {

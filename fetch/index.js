@@ -33,7 +33,7 @@ export default class FetchDataModule {
         if (ApiName) {
             if (API_URL[ApiName].needLogin) {
                 if (login) {
-                    return this.fetchData(ApiName, params);
+                    return this.fetchData({ApiName, params});
                 } else {
                     return new Promise(() => {
                         pushLoginFunc()
@@ -43,7 +43,8 @@ export default class FetchDataModule {
                 return this.fetchData({ApiName, params})
             }
         } else {
-            Alert.alert("FetchDataModule模块调用异常，请检查传递参数");
+            Alert.alert("FetchDataModule模块调用异常，请检查传递参数")
+            return new Promise(()=>{})
         }
     }
 
@@ -102,7 +103,7 @@ export default class FetchDataModule {
 
         return fetch(API_URL[ApiName].fetchUrl + "?" + toQueryString(params), {
             method: "GET",
-            headers: getHeadersFunc()
+            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/x-www-form-urlencoded"})
         })
         .then(res => {
             return this.HandleRequestResults({
@@ -116,7 +117,7 @@ export default class FetchDataModule {
     /*
      *  POST请求
     */
-    static post(ApiName, params) {
+    static post({ApiName, params}) {
 
         const {
             API_URL,
@@ -125,7 +126,7 @@ export default class FetchDataModule {
 
         return fetch(API_URL[ApiName].fetchUrl, {
             method: "POST",
-            headers: getHeadersFunc(),
+            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/json"}),
             body: JSON.stringify(params)
         })
         .then(res => {
@@ -135,6 +136,7 @@ export default class FetchDataModule {
                 params
             })
         })
+
     }
 
     /*
