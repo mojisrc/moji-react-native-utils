@@ -14,7 +14,7 @@ let libraryConfig = {
         alert('未设置 getLoginFunc 方法')
     },
     pushLoginFunc:()=>{
-        alert('未设置 getLoginFunc 方法')
+        alert('未设置 pushLoginFunc 方法')
     },
     APP_ROOT_CONFIG:null,
     removeUserInfoFunc:()=>{

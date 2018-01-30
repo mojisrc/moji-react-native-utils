@@ -6,6 +6,7 @@ import {
     FailureView,
     ErrorView,
     NullDataView,
+    LoginView,
 } from './fetchView';
 import {libraryConfig} from "../libraryConfig";
 
@@ -17,6 +18,9 @@ const stateHOC = (initHocParams = {})=>{
         FailureView,
         ErrorView,
         NullDataView,
+        LoginView,
+        detail:false,
+        needLogin:false,
     }, initHocParams)
     return (WrappedComponent)=>{
         return class StateContainer extends WrappedComponent {
@@ -39,6 +43,7 @@ const stateHOC = (initHocParams = {})=>{
                 const {
                     detail,
                     keyFunc,
+                    needLogin,
                 } = hocParams
 
                 if(detail){
@@ -64,32 +69,50 @@ const stateHOC = (initHocParams = {})=>{
                     FailureView,
                     ErrorView,
                     NullDataView,
+                    LoginView,
+                    needLogin,
                 } = hocParams
 
-                const LoadingViewStyle = Object.assign({},{
+                const layoutStyle = Object.assign({},{
                     autoLayout : height==undefined?true:false,
                     height,
                 })
+
+                if(needLogin){
+                    const {
+                        login
+                    } = this.props
+                    if(!login){
+                        return (
+                            <LoginView
+                                {...layoutStyle}
+                                pushLoginFunc={()=>{
+                                    libraryConfig.pushLoginFunc()
+                                }}
+                            />
+                        )
+                    }
+                }
 
                 switch (fetchStatus) {
                     case FetchStatus.l:
                         return  (
                             <LoadingView
-                                {...LoadingViewStyle}
+                                {...layoutStyle}
                             />
                         )
                     case FetchStatus.s:
 
                         if(super.hocNullDataFunc&&super.hocNullDataFunc()){
-                            return  <NullDataView {...LoadingViewStyle}/>
+                            return  <NullDataView {...layoutStyle}/>
                         }else {
                             return <WrappedComponent {...this.props} stateHOCState={this.state}/>
                         }
 
                     case FetchStatus.f:
-                        return  <FailureView {...LoadingViewStyle}/>
+                        return  <FailureView {...layoutStyle}/>
                     case FetchStatus.e:
-                        return  <ErrorView {...LoadingViewStyle}/>
+                        return  <ErrorView {...layoutStyle}/>
                     default :
                         return null
                 }

@@ -193,7 +193,7 @@ export default class FetchDataModule {
                     this.ErrorApiFetch({ApiName, errmsg: e, params})
                 });
             }
-            return new Promise(() => {})
+            return new Promise((resolve, reject)=>{reject()})
         } else {
             return res
                 .json()
@@ -254,7 +254,7 @@ export default class FetchDataModule {
 
         fetch(errorCollectApi, {
             method: "POST",
-            headers: getHeadersFunc(),
+            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/x-www-form-urlencoded"}),
             body: toQueryString({
                 project: `${AppName}${AppPlatform}端`,
                 post_author: errorApiDeveloper.name,
