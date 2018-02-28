@@ -31,6 +31,9 @@ const stateHOC = (initHocParams = {})=>{
             static defaultProps = {
 
             };
+            refresh = ()=>{
+                super.hocComponentDidMount && super.hocComponentDidMount()
+            }
             componentDidMount(){
                 super.hocComponentDidMount && super.hocComponentDidMount()
             }
@@ -110,9 +113,9 @@ const stateHOC = (initHocParams = {})=>{
                         }
 
                     case FetchStatus.f:
-                        return  <FailureView {...layoutStyle}/>
+                        return  <FailureView {...layoutStyle} refresh={this.refresh}/>
                     case FetchStatus.e:
-                        return  <ErrorView {...layoutStyle}/>
+                        return  <ErrorView {...layoutStyle} refresh={this.refresh}/>
                     default :
                         return null
                 }
