@@ -1,0 +1,29 @@
+{
+  "name": "moji-react-native-utils",
+  "version": "2.0.2",
+  "description": "mojiSrc react-native utils",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "react-native": "0.57.3"
+  },
+  "peerDependencies": {
+    "react-native": "0.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mojisrc/moji-react-native-utils.git"
+  },
+  "keywords": [
+    "fashop"
+  ],
+  "author": "FaShop",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mojisrc/moji-react-native-utils/issues"
+  },
+  "homepage": "https://github.com/mojisrc/moji-react-native-utils#readme",
+  "dependencies": {}
+}
