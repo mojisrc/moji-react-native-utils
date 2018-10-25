@@ -1,42 +1,37 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
-import FetchStatus from '../fetch-status';
+import FetchStatus from '../fetchStatus';
 import {
-    LoadingView,
-    FailureView,
-    ErrorView,
-    NullDataView,
-    LoginView,
+    Loading,
+    Failure,
+    Error,
+    Null,
+    Login,
 } from './fetchView';
-import {libraryConfig} from "../libraryConfig";
+import { config } from "../config";
 
 
-
-const stateHOC = (initHocParams = {})=>{
+const stateHOC = (initHocParams = {}) => {
     const hocParams = Object.assign({}, {
-        LoadingView,
-        FailureView,
-        ErrorView,
-        NullDataView,
-        LoginView,
-        detail:false,
-        needLogin:false,
+        LoadingView: Loading,
+        FailureView: Failure,
+        ErrorView: Error,
+        NullDataView: Null,
+        LoginView: Login,
+        detail: false,
+        needLogin: false,
     }, initHocParams)
-    return (WrappedComponent)=>{
+    return (WrappedComponent) => {
         return class StateContainer extends WrappedComponent {
-            static navigationOptions = WrappedComponent.navigationOptions;
-            static propTypes = {
-
-            };
-            static defaultProps = {
-
-            };
-            refresh = ()=>{
+            static propTypes = {};
+            static defaultProps = {};
+            refresh = () => {
                 super.hocComponentDidMount && super.hocComponentDidMount()
             }
-            componentDidMount(){
+
+            componentDidMount() {
                 super.hocComponentDidMount && super.hocComponentDidMount()
             }
+
             render() {
 
                 const {
@@ -45,26 +40,25 @@ const stateHOC = (initHocParams = {})=>{
 
                 const {
                     detail,
-                    keyFunc,
-                    needLogin,
                 } = hocParams
 
-                if(detail){
+                if (detail) {
 
-                    const key = super.hocDetailKey&&super.hocDetailKey()
+                    const key = super.hocDetailKey && super.hocDetailKey()
 
-                    if(!key){
-                        libraryConfig.ToastError('装饰器参数传递错误')
+                    if (!key) {
+                        config.ToastError('装饰器参数传递错误')
                         return null
                     }
 
                     return this.showView(fetchStatus[key])
 
-                }else {
+                } else {
                     return this.showView(fetchStatus)
                 }
             }
-            showView(fetchStatus){
+
+            showView(fetchStatus) {
 
                 const {
                     height,
@@ -76,21 +70,21 @@ const stateHOC = (initHocParams = {})=>{
                     needLogin,
                 } = hocParams
 
-                const layoutStyle = Object.assign({},{
-                    autoLayout : height==undefined?true:false,
+                const layoutStyle = Object.assign({}, {
+                    autoLayout: height === undefined,
                     height,
                 })
 
-                if(needLogin){
+                if (needLogin) {
                     const {
                         login
                     } = this.props
-                    if(!login){
+                    if (!login) {
                         return (
                             <LoginView
                                 {...layoutStyle}
-                                pushLoginFunc={()=>{
-                                    libraryConfig.pushLoginFunc()
+                                pushLogin={() => {
+                                    config.pushLogin()
                                 }}
                             />
                         )
@@ -99,23 +93,23 @@ const stateHOC = (initHocParams = {})=>{
 
                 switch (fetchStatus) {
                     case FetchStatus.l:
-                        return  (
+                        return (
                             <LoadingView
                                 {...layoutStyle}
                             />
                         )
                     case FetchStatus.s:
 
-                        if(super.hocNullDataFunc&&super.hocNullDataFunc()){
-                            return  <NullDataView {...layoutStyle}/>
-                        }else {
-                            return <WrappedComponent {...this.props} stateHOCState={this.state}/>
+                        if (super.hocNullData && super.hocNullData()) {
+                            return <NullDataView {...layoutStyle} />
+                        } else {
+                            return <WrappedComponent {...this.props} stateHOCState={this.state} />
                         }
 
                     case FetchStatus.f:
-                        return  <FailureView {...layoutStyle} refresh={this.refresh}/>
+                        return <FailureView {...layoutStyle} refresh={this.refresh} />
                     case FetchStatus.e:
-                        return  <ErrorView {...layoutStyle} refresh={this.refresh}/>
+                        return <ErrorView {...layoutStyle} refresh={this.refresh} />
                     default :
                         return null
                 }

@@ -8,7 +8,7 @@ import{
 } from 'react-native';
 
 
-export default class LoginView extends Component{
+export default class Login extends Component{
     static propTypes = {
         height : PropTypes.oneOfType([
             PropTypes.number,
@@ -21,7 +21,7 @@ export default class LoginView extends Component{
         autoLayout : false,
     };
     render() {
-        const {autoLayout,height,pushLoginFunc} = this.props
+        const {autoLayout,height,pushLogin} = this.props
         return (
             <View
                 style={[
@@ -37,7 +37,7 @@ export default class LoginView extends Component{
             >
                 <Text
                     onPress={()=>{
-                        pushLoginFunc()
+                        pushLogin()
                     }}
                 >
                     需要登录

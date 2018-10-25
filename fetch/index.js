@@ -1,209 +1,171 @@
-// import { API_URL } from "./APP_ROOT_NETWORK_CONFIG";
-// import { errorHandler, addNetInfoListener } from "./errorHandler";
 import {
     Platform,
     Alert,
     InteractionManager,
     Linking,
 } from "react-native";
-// import {
-//     AppName,
-//     AppPlatform,
-//     errorCollectApi,
-//     env,
-//     developer,
-// } from "./APP_ROOT_CONFIG";
 
 
-import {libraryConfig} from "../libraryConfig"
-
-
+import { config } from "../config"
 
 export default class FetchDataModule {
     /*
      *  请求入口
     */
-    static fetch({ApiName, params}) {
+    static fetch({ api, params }) {
         const {
-            API_URL,
-            getLoginFunc,
-            pushLoginFunc,
-        } = libraryConfig
-        const login = getLoginFunc()
-        if (ApiName) {
-            if (API_URL[ApiName].needLogin) {
+            getLogin,
+            pushLogin,
+        } = config
+        const login = getLogin()
+        if (api) {
+            if (api.needLogin) {
                 if (login) {
-                    return this.fetchData({ApiName, params});
+                    return this.fetchData({ api, params });
                 } else {
                     return new Promise(() => {
-                        pushLoginFunc()
+                        pushLogin()
                     })
                 }
             } else {
-                return this.fetchData({ApiName, params})
+                return this.fetchData({ api, params })
             }
         } else {
-            Alert.alert("FetchDataModule模块调用异常，请检查传递参数")
-            return new Promise(()=>{})
+            // noinspection JSAnnotator
+            throw new 'params error : missing or error api'
         }
     }
 
     /*
-     *  处理请求的接口
-    */
-    static fetchData({ApiName, params}) {
-        const {
-            API_URL,
-            showLoading,
-        } = libraryConfig
-        if (API_URL[ApiName].showLoading) {
+    *  处理请求的接口
+   */
+    static fetchData({ api, params }) {
+        const { showLoading, } = config
+        if (api.showLoading) {
             showLoading()
         }
-        if (API_URL[ApiName].method == "GET") {
-            return this.get({ApiName, params});
-        } else if (API_URL[ApiName].method == "POST") {
-            return this.post({ApiName, params});
+        if (api.method === "GET") {
+            return this.get({ api, params })
+        } else if (api.method === "POST") {
+            return this.post({ api, params })
         } else {
-            Alert.alert("接口预定义信息错误", `接口名:${ApiName}${"\b"}错误类型:请求方式异常`, [
-                {
-                    text: "查看接口描述",
-                    onPress: () => {
-                        console.warn(
-                            `接口预定义信息错误的接口描述:${API_URL[ApiName].remark}`
-                        );
-                    }
-                },
-                {
-                    text: "查看接口地址",
-                    onPress: () => {
-                        console.warn(
-                            `接口预定义信息错误的接口地址:${API_URL[ApiName].fetchUrl}`
-                        );
-                    }
-                },
-                {
-                    text: "确定",
-                    onPress: () => {
-                        console.warn("请处理错误接口");
-                    }
-                }
-            ]);
+            throw new `错误类型:请求方式异常，接口名:${api.url}`
         }
     }
 
     /*
-     *  GET请求
-    */
-    static get({ApiName, params}) {
-
+    *  GET请求
+   */
+    static get({ api, params }) {
+        const { getHeaders } = config
         const {
-            API_URL,
-            getHeadersFunc,
-        } = libraryConfig
-
-        return fetch(API_URL[ApiName].fetchUrl + "?" + toQueryString(params), {
+            mock,
+            url,
+            mockUrl,
+        } = api
+        return fetch(mock ? mockUrl : url + "?" + toQueryString(params), {
             method: "GET",
-            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/x-www-form-urlencoded"})
+            headers: Object.assign({}, mock ? {} : getHeaders(), { "Content-Type": "application/x-www-form-urlencoded" }),
         })
-        .then(res => {
-            return this.HandleRequestResults({
-                res,
-                ApiName,
-                params
+            .then(res => {
+                return this.handleRequestResults({
+                    res,
+                    api,
+                    params,
+                });
             })
-        })
+
     }
 
     /*
-     *  POST请求
-    */
-    static post({ApiName, params}) {
-
+      *  POST请求
+     */
+    static post({ api, params }) {
+        const { getHeaders } = config
         const {
-            API_URL,
-            getHeadersFunc,
-        } = libraryConfig
-
-        return fetch(API_URL[ApiName].fetchUrl, {
+            mock,
+            url,
+            mockUrl,
+        } = api
+        return fetch(mock ? mockUrl : url, {
             method: "POST",
-            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/json"}),
+            headers: Object.assign({}, mock ? {} : getHeaders(), { "Content-Type": "application/json" }),
             body: JSON.stringify(params)
         })
-        .then(res => {
-            return this.HandleRequestResults({
-                res,
-                ApiName,
-                params
+            .then(res => {
+                return this.handleRequestResults({
+                    res,
+                    api,
+                    params,
+                });
             })
-        })
-
     }
 
     /*
-     *  处理请求结果
-     *  res.headers.map['content-type'][0]                      非debug
-     *  res._bodyBlob.type                                      debug
-    */
-    static HandleRequestResults({res, ApiName, params}) {
-
+    *  处理请求结果
+   */
+    static handleRequestResults({ res, api, params }) {
         const {
-            API_URL,
-            hideLoading,
             APP_ROOT_CONFIG,
-            ToastError,
             removeUserInfoFunc,
-        } = libraryConfig
-
+            Toast,
+            Modal,
+            hideLoading,
+        } = config
         const {
             env
         } = APP_ROOT_CONFIG
-
-        if (API_URL[ApiName].showLoading) {
+        if (api.showLoading) {
             hideLoading()
         }
-
-        if (res.headers.map["content-type"][0] != `application/json; charset=utf-8`) {
-            if(env.showNetWorkErrorInfo){
+        if (!res.ok) {
+            if (env.showNetWorkErrorInfo) {
                 res.text()
-                .then(err => {
-                    setTimeout(()=>{
-                        Alert.alert(
-                            "接口请求错误", `接口名:${API_URL[ApiName].apiUrl}`,
+                    .then(errmsg => {
+                        Modal.alert(
+                            "接口请求错误", `接口名:${api.apiUrl}`,
                             [
                                 {
                                     text: "上报接口异常",
                                     onPress: () => {
                                         this.ErrorApiFetch({
-                                            ApiName,
-                                            errmsg: err,
-                                            params
-                                        })
+                                            api,
+                                            errmsg,
+                                            params,
+                                        });
                                     }
                                 },
-                                { text: "查看报错信息", onPress: () => console.warn(err) },
-                                { text: "确定", onPress: () => {} }
+                                { text: "查看报错信息", onPress: () => console.warn(errmsg) },
+                                {
+                                    text: "确定", onPress: () => {
+                                    }
+                                }
                             ]
                         );
-                    },API_URL[ApiName].showLoading?1000:1)
+                    });
+            }
+            if (env.defaultUploadNetWorkErrorInfo) {
+                Toast.info('捕获到服务器返回数据类型异常，正在自动提交错误信息');
+                res.text().then(errmsg => {
+                    this.ErrorApiFetch({
+                        api,
+                        errmsg,
+                        params,
+                    });
                 });
             }
-            if(env.defaultUploadNetWorkErrorInfo){
-                ToastError("捕获到服务器返回数据类型异常，正在自动提交错误信息");
-                res.text().then(e => {
-                    this.ErrorApiFetch({ApiName, errmsg: e, params})
-                });
-            }
-            return new Promise((resolve, reject)=>{reject()})
+            return new Promise((resolve, reject) => {
+                reject()
+            });
         } else {
             return res
                 .json()
                 .then(res => {
-                    return new Promise((resolve,reject) => {
-                        if (res.errcode != -999) {
+                    return new Promise(resolve => {
+                        if (res.errcode !== -999) {
                             resolve(res);
                         } else {
-                            reject(res)
-                            ToastError("token验证异常，请重新登录");
+                            Toast.error("token验证异常，请重新登录");
                             removeUserInfoFunc()
                         }
                     });
@@ -212,8 +174,8 @@ export default class FetchDataModule {
     }
 
     /*
-     *  微信专用请求
-    */
+         *  微信专用请求
+        */
     static wechat(url, params, callback) {
         return fetch(url + "?" + toQueryString(params), {
             method: "GET",
@@ -221,129 +183,67 @@ export default class FetchDataModule {
                 "Content-Type": "application/x-www-form-urlencoded"
             }
         })
-        .then(res => res.json())
-        .then(data => {
-            return new Promise(resolve=>resolve(data))
-        })
+            .then(res => res.json())
+            .then(data => {
+                return new Promise(resolve => resolve(data))
+            })
     }
 
     /*
      *  请求错误处理
     */
-    static ErrorApiFetch({ApiName, errmsg, params}) {
+    static ErrorApiFetch({ api, errmsg, params }) {
         const {
-            API_URL,
             APP_ROOT_CONFIG,
-            ToastError,
-            getHeadersFunc,
-            ToastWarn,
-            ToastInfo,
-        } = libraryConfig
-        const {
-            developer,
-            errorCollectApi,
-            AppName,
-            AppPlatform,
-        } = APP_ROOT_CONFIG
+        } = config
 
-        const errorApiDeveloper = developerVerification({
-            developerName: API_URL[ApiName].developer,
-            developer,
-            ToastError,
-        })
 
         fetch(errorCollectApi, {
             method: "POST",
-            headers: Object.assign({},getHeadersFunc(),{"Content-Type": "application/x-www-form-urlencoded"}),
+            headers: Object.assign({}, headers, { "Content-Type": "application/json" }),
             body: toQueryString({
-                project: `${AppName}${AppPlatform}端`,
-                post_author: errorApiDeveloper.name,
+                project: `${APP_ROOT_CONFIG.AppName}${APP_ROOT_CONFIG.AppPlatform}端`,
                 server_return: errmsg,
-                api_address: `${API_URL[ApiName].method}:${API_URL[ApiName].fetchUrl}?${toQueryString(params)}`,
-                api_author: API_URL[ApiName].author
+                api_address: `${api.method}:${api.url}?${toQueryString(params)}`,
             })
         })
-        .then(res => {
-            if (res.headers.map["content-type"][0] != `application/json; charset=utf-8`) {
-                Alert.alert("提交错误的接口都报错了", `肿么办ﾍ(;´Д｀ﾍ)`, [
-                    {
-                        text: "GG",
-                        onPress: () => {ToastWarn('你选择了GG')}
-                    },{
-                        text: "人肉联系开发人员",
-                        onPress: () => {
-                            Alert.alert(
-                                `接口的使用者是 ${errorApiDeveloper.name}`,
-                                '是否要拨打电话联系开发者',
-                                [
-                                    {
-                                        text: '取消',
-                                        onPress: () => {}
-                                    },
-                                    {
-                                        text: '拨打',
-                                        onPress: () => {
-                                            Linking.openURL(`tel:${errorApiDeveloper.phone}`).catch(err => console.warn('拨打电话失败，请检查当前环境'));
-                                        }
-                                    },
-                                ]
-                            )
-                        }
-                    },{
-                        text: "确定",
-                        onPress: () => {}
-                    }
-                ]);
-            }else {
-                res.json()
-                .then(e => {
-                    ToastInfo("服务器异常提交成功");
-                })
-            }
-        })
-    }
-}
-
-
-
-// 获取开发者信息
-const developerVerification = ({developerName,developer,ToastError})=>{
-    if(developerName){
-        if(developer.allDeveloper[developerName]){
-            return developer.allDeveloper[developerName]
-        }else {
-            ToastError('检测到定义了错误的接口开发者，请审查APP_ROOT_NETWORK_CONFIG')
-            return developer.main
-        }
-    }else {
-        return developer.main
+            .then(res => {
+                if (!res.ok) {
+                    throw `错误收集接口错误：${APP_ROOT_CONFIG.errorApiDeveloper.name}`
+                } else {
+                    res.json()
+                        .then(e => {
+                            Toast.info("异常提交成功");
+                        })
+                }
+            })
     }
 }
 
 function toQueryString(obj) {
     return obj
         ? Object.keys(obj)
-              .sort()
-              .map(function(key) {
-                  var val = obj[key];
-                  if (Array.isArray(val)) {
-                      return val
-                          .sort()
-                          .map(function(val2) {
-                              return encodeURIComponent(key) +
-                                  "[]=" +
-                                  encodeURIComponent(val2);
-                          })
-                          .join("&");
-                  }
-                  if (val) {
-                      return encodeURIComponent(key) +
-                          "=" +
-                          encodeURIComponent(val);
-                  } else {
-                      return encodeURIComponent(key) + "=";
-                  }
-              })
-              .join("&")
+            .sort()
+            .map(function (key) {
+                var val = obj[key];
+                if (Array.isArray(val)) {
+                    return val
+                        .sort()
+                        .map(function (val2) {
+                            return encodeURIComponent(key) +
+                                "[]=" +
+                                encodeURIComponent(val2);
+                        })
+                        .join("&");
+                }
+                if (val) {
+                    return encodeURIComponent(key) +
+                        "=" +
+                        encodeURIComponent(val);
+                } else {
+                    return encodeURIComponent(key) + "=";
+                }
+            })
+            .join("&")
         : "";
 }

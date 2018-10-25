@@ -8,7 +8,7 @@ import{
 } from 'react-native';
 
 
-export default class ErrorView extends Component{
+export default class NullData extends Component{
     static propTypes = {
         height : PropTypes.oneOfType([
             PropTypes.number,

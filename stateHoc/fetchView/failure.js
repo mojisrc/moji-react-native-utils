@@ -1,6 +1,6 @@
-import React,{ Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import{
+import {
     StyleSheet,
     View,
     Image,
@@ -8,50 +8,45 @@ import{
 } from 'react-native';
 
 
-export default class NullDataView extends Component{
+export default class Failure extends Component {
     static propTypes = {
-        height : PropTypes.oneOfType([
+        height: PropTypes.oneOfType([
             PropTypes.number,
             PropTypes.string
         ]),
-        autoLayout : PropTypes.bool,
+        autoLayout: PropTypes.bool,
     };
     static defaultProps = {
-        height : '40%',
-        autoLayout : false,
+        height: '40%',
+        autoLayout: false,
     };
+
     render() {
-        const {autoLayout,height} = this.props
+        const { autoLayout, height } = this.props
         return (
             <View
                 style={[
                     styles.loaddingView,
                     autoLayout
-                    ?   {
-                            flex:1
+                        ? {
+                            flex: 1
                         }
-                    :   {
+                        : {
                             height,
                         }
                 ]}
             >
-                <Text>请求错误</Text>
+                <Text>请求失败</Text>
             </View>
         )
     }
 }
 
 
-
-
-
-
 const styles = StyleSheet.create({
-    loaddingView:{
-        justifyContent:'center',
-        alignItems:'center',
+    loaddingView: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    loaddingImage:{
-
-    },
+    loaddingImage: {},
 })

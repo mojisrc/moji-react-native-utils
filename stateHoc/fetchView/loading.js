@@ -8,7 +8,7 @@ import{
 } from 'react-native';
 
 
-export default class FailureView extends Component{
+export default class Loading extends Component{
     static propTypes = {
         height : PropTypes.oneOfType([
             PropTypes.number,
@@ -35,7 +35,7 @@ export default class FailureView extends Component{
                         }
                 ]}
             >
-                <Text>请求失败</Text>
+                <Text>请求中</Text>
             </View>
         )
     }
