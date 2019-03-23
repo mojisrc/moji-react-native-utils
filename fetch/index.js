@@ -162,12 +162,17 @@ export default class FetchDataModule {
                 .json()
                 .then(res => {
                     return new Promise(resolve => {
-                        if (res.errcode !== -999) {
+                        // 临时为了兼容项目整合
+                        if(typeof res['errcode'] !== "undefined"){
+                            res['code'] = res['errcode']
+                        }
+                        if (res.code !== -999) {
                             resolve(res);
                         } else {
                             Toast.error("token验证异常，请重新登录");
                             removeUserInfoFunc()
                         }
+
                     });
                 })
         }
