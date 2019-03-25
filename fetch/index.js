@@ -1,11 +1,3 @@
-import {
-    Platform,
-    Alert,
-    InteractionManager,
-    Linking,
-} from "react-native";
-
-
 import { config } from "../config"
 
 export default class FetchDataModule {
@@ -59,13 +51,11 @@ export default class FetchDataModule {
     static get({ api, params }) {
         const { getHeaders } = config
         const {
-            mock,
             url,
-            mockUrl,
         } = api
-        return fetch(mock ? mockUrl : url + "?" + toQueryString(params), {
+        return fetch(url + "?" + toQueryString(params), {
             method: "GET",
-            headers: Object.assign({}, mock ? {} : getHeaders(), { "Content-Type": "application/x-www-form-urlencoded" }),
+            headers: Object.assign({}, getHeaders(), { "Content-Type": "application/x-www-form-urlencoded" }),
         })
             .then(res => {
                 return this.handleRequestResults({
@@ -83,13 +73,11 @@ export default class FetchDataModule {
     static post({ api, params }) {
         const { getHeaders } = config
         const {
-            mock,
             url,
-            mockUrl,
         } = api
-        return fetch(mock ? mockUrl : url, {
+        return fetch(url, {
             method: "POST",
-            headers: Object.assign({}, mock ? {} : getHeaders(), { "Content-Type": "application/json" }),
+            headers: Object.assign({}, getHeaders(), { "Content-Type": "application/json" }),
             body: JSON.stringify(params)
         })
             .then(res => {
@@ -106,7 +94,7 @@ export default class FetchDataModule {
    */
     static handleRequestResults({ res, api, params }) {
         const {
-            APP_ROOT_CONFIG,
+            app,
             removeUserInfoFunc,
             Toast,
             Modal,
@@ -114,7 +102,7 @@ export default class FetchDataModule {
         } = config
         const {
             env
-        } = APP_ROOT_CONFIG
+        } = app
         if (api.showLoading) {
             hideLoading()
         }
@@ -123,7 +111,7 @@ export default class FetchDataModule {
                 res.text()
                     .then(errmsg => {
                         Modal.alert(
-                            "接口请求错误", `接口名:${api.apiUrl}`,
+                            "接口请求错误", `接口名:${api.url}`,
                             [
                                 {
                                     text: "上报接口异常",
@@ -163,7 +151,7 @@ export default class FetchDataModule {
                 .then(res => {
                     return new Promise(resolve => {
                         // 临时为了兼容项目整合
-                        if(typeof res['errcode'] !== "undefined"){
+                        if (typeof res['errcode'] !== "undefined") {
                             res['code'] = res['errcode']
                         }
                         if (res.code !== -999) {
@@ -199,7 +187,7 @@ export default class FetchDataModule {
     */
     static ErrorApiFetch({ api, errmsg, params }) {
         const {
-            APP_ROOT_CONFIG,
+            app,
         } = config
 
 
@@ -207,14 +195,14 @@ export default class FetchDataModule {
             method: "POST",
             headers: Object.assign({}, headers, { "Content-Type": "application/json" }),
             body: toQueryString({
-                project: `${APP_ROOT_CONFIG.AppName}${APP_ROOT_CONFIG.AppPlatform}端`,
+                project: `${app.name}${app.platform}端`,
                 server_return: errmsg,
                 api_address: `${api.method}:${api.url}?${toQueryString(params)}`,
             })
         })
             .then(res => {
                 if (!res.ok) {
-                    throw `错误收集接口错误：${APP_ROOT_CONFIG.errorApiDeveloper.name}`
+                    throw `错误收集接口错误：${app.errorApiDeveloper.name}`
                 } else {
                     res.json()
                         .then(e => {

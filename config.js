@@ -1,4 +1,15 @@
 let config = {
+    app: {
+        name: null,
+        env: null,
+        platform: null,
+        errorCollectApi: null
+    },
+    Modal: {
+        alert: (e) => {
+            console.warn(e)
+        }
+    },
     ToastInfo: (content, duration, onClose, mask) => {
         alert('未设置 ToastInfo 方法')
     },
@@ -8,14 +19,12 @@ let config = {
     ToastWarn: (content, duration, onClose, mask) => {
         alert('未设置 ToastWarn 方法')
     },
-    API_URL: null,
     getLogin: () => {
         alert('未设置 getLogin 方法')
     },
     pushLogin: () => {
         alert('未设置 pushLogin 方法')
     },
-    APP_ROOT_CONFIG: null,
     removeUserInfo: () => {
         alert('未设置 removeUserInfo 方法')
     },
