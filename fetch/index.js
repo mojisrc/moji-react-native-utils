@@ -116,7 +116,7 @@ export default class FetchDataModule {
                                 {
                                     text: "上报接口异常",
                                     onPress: () => {
-                                        this.ErrorApiFetch({
+                                        this.errorApiFetch({
                                             api,
                                             errmsg,
                                             params,
@@ -135,7 +135,7 @@ export default class FetchDataModule {
             if (env.defaultUploadNetWorkErrorInfo) {
                 Toast.info('捕获到服务器返回数据类型异常，正在自动提交错误信息');
                 res.text().then(errmsg => {
-                    this.ErrorApiFetch({
+                    this.errorApiFetch({
                         api,
                         errmsg,
                         params,
@@ -185,15 +185,16 @@ export default class FetchDataModule {
     /*
      *  请求错误处理
     */
-    static ErrorApiFetch({ api, errmsg, params }) {
+    static errorApiFetch({ api, errmsg, params }) {
         const {
             app,
         } = config
 
 
-        fetch(errorCollectApi, {
+        fetch(app.errorCollectApi, {
             method: "POST",
-            headers: Object.assign({}, headers, { "Content-Type": "application/json" }),
+            // 临时写
+            headers: { "Content-Type": "application/json" },
             body: toQueryString({
                 project: `${app.name}${app.platform}端`,
                 server_return: errmsg,
@@ -201,14 +202,6 @@ export default class FetchDataModule {
             })
         })
             .then(res => {
-                if (!res.ok) {
-                    throw `错误收集接口错误：${app.errorApiDeveloper.name}`
-                } else {
-                    res.json()
-                        .then(e => {
-                            Toast.info("异常提交成功");
-                        })
-                }
             })
     }
 }
