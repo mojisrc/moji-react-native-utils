@@ -40,7 +40,7 @@ let config = {
 }
 
 const initLibraryConfig = (e = {}) => {
-    config = Object.assign({}, config, e)
+    return config = Object.assign({}, config, e)
 }
 
 
