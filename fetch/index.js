@@ -209,12 +209,10 @@ export default class FetchDataModule {
 function toQueryString(obj) {
     return obj
         ? Object.keys(obj)
-            .sort()
             .map(function (key) {
                 var val = obj[key];
                 if (Array.isArray(val)) {
                     return val
-                        .sort()
                         .map(function (val2) {
                             return encodeURIComponent(key) +
                                 "[]=" +
